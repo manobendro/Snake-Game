@@ -10,12 +10,14 @@ class Snake{
         {gx:13, gy:30},
         {gx:12, gy:30}
     ];
-    food = {gx:15, gy:20}
+    food = {gx:15, gy:20};
     moving_direc= D_RIGHT;
 
     prev_time = 0;
 
     score = 0;
+
+    speed = 330;
 
     constructor(){
         this.prev_time = millis();
@@ -81,10 +83,21 @@ class Snake{
             this.food.gx = floor(random(2, 30));
             this.food.gy = floor(random(2, 60));
             //console.log(this.food);
+            if(this.speed > 10){
+                this.speed = this.speed - this.speed * 0.1;
+            } 
         }
     }
     isSnakeDied(){
-        return (this.head.gx == 1 || this.head.gx == 30 || this.head.gy == 1 || this.head.gy == 60);
+        return (this.head.gx == 1 || this.head.gx == 30 || this.head.gy == 1 || this.head.gy == 60) || this.bodyTouch();
+    }
+    bodyTouch(){
+        for(let tail of this.tails){
+            if(this.head.gx == tail.gx && this.head.gy == tail.gy){
+                return true;
+            }
+        }
+        return false;
     }
     getScore(){
         return this.score;
@@ -92,7 +105,7 @@ class Snake{
 
     draw(){
 
-        if(floor(millis()-this.prev_time)>333){
+        if(floor(millis()-this.prev_time) > this.speed){
             //console.log("...");
             if(!this.isSnakeDied()){
                 this.move();
@@ -102,10 +115,13 @@ class Snake{
         }
 
         //Drawing food
-        drawSblock({gx:this.food.gx, gy:this.food.gy})
+        fill('blue');
+        drawSblock({gx:this.food.gx, gy:this.food.gy});
         //Drawing head
+        fill('red');
         drawSblock({gx:this.head.gx, gy:this.head.gy});
         //Drawing tail
+        fill('white');
         this.drawTail();
     }
     drawTail(){
@@ -119,6 +135,7 @@ class Snake{
 let snake = null;
 function setup(){
     snake = new Snake();
+    swipedetect(document.getElementById('defaultCanvas0'), tuchSwipe);
     createCanvas(300, 600);
 }
 
@@ -145,6 +162,17 @@ function keyPressed(){
         snake._move(D_LEFT);
     }else if(keyCode == RIGHT_ARROW){
         _lg("RIGHT");
+        snake._move(D_RIGHT);
+    }
+}
+function tuchSwipe(swipeDir){
+    if(swipeDir == 'up'){
+        snake._move(D_UP);
+    }else if(swipeDir == 'down'){
+        snake._move(D_DOWN);
+    }else if(swipeDir == 'left'){
+        snake._move(D_LEFT);
+    }else if(swipeDir == 'right'){
         snake._move(D_RIGHT);
     }
 }
